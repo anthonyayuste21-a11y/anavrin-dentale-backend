@@ -397,10 +397,21 @@ def send_sms_notification():
     cursor = conn.cursor()
     timestamp = datetime.now().strftime('%Y-%m-%d %I:%M %p')
 
+    # Pinagandang email fallback lookup para sigurado ang Resend delivery
     if not email:
-        user_row = conn.execute('SELECT email FROM users WHERE phone = ?', (phone,)).fetchone()
-        if user_row and user_row['email']:
-            email = user_row['email']
+        if message_id:
+            msg_user_row = conn.execute('''
+                SELECT u.email FROM patient_messages m 
+                JOIN users u ON m.user_id = u.id 
+                WHERE m.id = ?
+            ''', (message_id,)).fetchone()
+            if msg_user_row and msg_user_row['email']:
+                email = msg_user_row['email']
+        
+        if not email and phone:
+            user_row = conn.execute('SELECT email FROM users WHERE phone = ?', (phone.strip(),)).fetchone()
+            if user_row and user_row['email']:
+                email = user_row['email']
     
     cursor.execute(
         'INSERT INTO sms_notifications (phone, message, timestamp) VALUES (?, ?, ?)',
