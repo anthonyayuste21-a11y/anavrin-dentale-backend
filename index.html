@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anavrin Dentale</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #2b2b2b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    
+    .mobile-frame { 
+      width: 100%; 
+      max-width: 460px; 
+      height: 800px; 
+      background-color: #dbece2; 
+      border-radius: 35px; 
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); 
+      padding: 24px 20px; 
+      position: relative; 
+      overflow: hidden; 
+      display: flex; 
+      flex-direction: column; 
+    }
+
+    .screen { display: none; flex-direction: column; gap: 18px; width: 100%; height: 100%; animation: fadeIn 0.4s ease-in-out; }
+    .screen.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+    
+    #screen-splash { align-items: center; justify-content: center; }
+    .splash-card { background: #ffffff; width: 85%; padding: 40px 20px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+    .logo-container { width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; }
+    .logo-container img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    .splash-title { color: #1c1c3c; font-size: 1.8rem; font-weight: 700; letter-spacing: 0.5px; }
+    
+    .app-header { text-align: center; margin-top: 5px; margin-bottom: 5px; }
+    .brand-title { color: #1a4d2e; font-size: 1.6rem; font-weight: 700; }
+    
+    .card { background: #ffffff; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; gap: 14px; }
+    .card-title { color: #2e3d30; font-size: 1.15rem; text-align: center; margin-bottom: 2px; font-weight: 700; }
+    
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.9rem; font-weight: 600; color: #4a5d4e; }
+    .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1px solid #d0e1d4; border-radius: 10px; font-size: 0.95rem; background-color: #f9fbf9; outline: none; }
+    
+    .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary { background-color: #1abc9c; color: white; }
+    .btn-outline { background-color: transparent; border: 1.5px solid #1a4d2e; color: #1a4d2e; }
+    .btn-danger { background-color: #e74c3c; color: white; margin-top: 10px; }
+    .error-msg { color: #e74c3c; font-size: 0.85rem; text-align: center; font-weight: 600; display: none; }
+    
+    .divider { text-align: center; position: relative; margin: 5px 0; }
+    .divider::before { content: ""; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background-color: #c2d6c7; z-index: 1; }
+    .divider span { position: relative; z-index: 2; background-color: #dbece2; padding: 0 10px; font-size: 0.85rem; color: #6b8271; font-weight: 600; }
+    
+    #main-app { display: none; flex-direction: column; height: 100%; justify-content: space-between; overflow: hidden; }
+    #main-app.active { display: flex; }
+    
+    .tab-content { display: none; flex: 1; overflow-y: auto; padding-right: 6px; }
+    .tab-content.active { display: flex; flex-direction: column; gap: 14px; }
+
+    .tab-content::-webkit-scrollbar { width: 6px; }
+    .tab-content::-webkit-scrollbar-thumb { background: #1abc9c; border-radius: 10px; }
+
+    .nav-bar { display: flex; justify-content: space-around; background: #ffffff; padding: 12px 5px; border-radius: 20px; box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.05); margin-top: 10px; flex-shrink: 0; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: #8fa394; font-size: 0.8rem; font-weight: 600; cursor: pointer; width: 33.33%; }
+    .nav-item i { font-size: 1.25rem; }
+    .nav-item.active { color: #1a4d2e; }
+
+    .service-card { 
+      background: #ffffff; 
+      border-radius: 14px; 
+      padding: 14px 16px; 
+      box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-left: 4px solid #1abc9c;
+    }
+    .service-card-title { 
+      font-size: 1rem; 
+      font-weight: 700; 
+      color: #1a4d2e; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+    }
+    .service-card-desc { 
+      font-size: 0.88rem; 
+      color: #4f5d52; 
+      line-height: 1.45; 
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-frame">
+    
+    <!-- Splash Screen -->
+    <section id="screen-splash" class="screen active">
+      <div class="splash-card">
+        <div class="logo-container">
+          <img src="logo.png" alt="Anavrin Dentale Logo">
+        </div>
+        <h1 class="splash-title">Anavrin Dentale</h1>
+      </div>
+    </section>
+
+    <!-- Login Screen -->
+    <section id="screen-login" class="screen">
+      <div class="app-header">
+        <h2 class="brand-title">Anavrin Dentale</h2>
+      </div>
+      <div class="card">
+        <h3 class="card-title">Log In</h3>
+        <p id="login-error" class="error-msg"><i class="fas fa-exclamation-circle"></i> Invalid username or password!</p>
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="login-username" placeholder="Enter your username" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="Enter your password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Log In</button>
+        </form>
+      </div>
+
+      <div class="divider"><span>OR</span></div>
+
+      <button class="btn btn-outline" type="button" onclick="showScreen('screen-signup')">
+        <i class="fas fa-user-plus"></i> Sign Up for Patient
+      </button>
+    </section>
+
+    <!-- Signup Screen -->
+    <section id="screen-signup" class="screen">
+      <div class="app-header">
+        <h2 class="brand-title">Anavrin Dentale</h2>
+      </div>
+      <div class="card">
+        <h3 class="card-title">Sign Up for Patient</h3>
+        <form onsubmit="handleSignUp(event)">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="signup-fullname" placeholder="Enter full name" required>
+          </div>
+          <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" id="signup-phone" placeholder="Enter phone number" required>
+          </div>
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="signup-username" placeholder="Create username" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signup-password" placeholder="Create password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+      <button class="btn btn-outline" type="button" onclick="showScreen('screen-login')">
+        <i class="fas fa-arrow-left"></i> Back to Log In
+      </button>
+    </section>
+
+    <!-- Main Dashboard -->
+    <div id="main-app">
+      
+      <!-- 1. HOME TAB -->
+      <div id="tab-home" class="tab-content active">
+        <div class="app-header">
+          <h2 class="brand-title">Hello, <span id="user-display-name">Patient</span>!</h2>
+        </div>
+
+        <div class="card" style="text-align: center;">
+          <i class="fas fa-tooth" style="font-size: 2.5rem; color: #1a4d2e; margin-bottom: 5px;"></i>
+          <h3 class="card-title">Anavrin Dentale</h3>
+          <p style="font-size: 0.88rem; color: #555; line-height: 1.5;">
+            Welcome to Anavrin Dentale. This place serves Mandaluyong. It provides professional dental care. The service is simple. The service is fast. The service is hassle-free appointments. This is because your smile deserves the best. We are here to keep you smiling. Book your appointment, in a few taps.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title" style="font-size: 1rem; text-align: left;"><i class="fas fa-clock" style="color:#1abc9c;"></i> Clinic Hours</h3>
+          <p style="font-size: 0.88rem; color: #444;">Monday &ndash; Friday: 9:00 AM &ndash; 6:00 PM</p>
+          <p style="font-size: 0.88rem; color: #444;">Saturday: 10:00 AM &ndash; 6:00 PM</p>
+          <p style="font-size: 0.88rem; color: #444;">Sunday: 10:00 AM &ndash; 4:30 PM</p>
+          
+          <h3 class="card-title" style="font-size: 1rem; text-align: left; margin-top: 5px;"><i class="fas fa-map-marker-alt" style="color:#e74c3c;"></i> Location</h3>
+          <p style="font-size: 0.88rem; color: #444;">Gen. Kalentong St. cor. Shaw Blvd, Mandaluyong City</p>
+        </div>
+
+        <button class="btn btn-primary" onclick="switchTab('tab-services', 'btn-nav-services')">
+          <i class="fas fa-calendar-alt"></i> Book an Appointment Now
+        </button>
+      </div>
+
+      <!-- 2. SERVICES TAB -->
+      <div id="tab-services" class="tab-content">
+        <div class="app-header">
+          <h2 class="brand-title">Our Services</h2>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Book a Service</h3>
+          <form onsubmit="handleBookAppointment(event)">
+            <div class="form-group">
+              <label>Select Service</label>
+              <select id="book-service" required>
+                <option value="" disabled selected>-- Select Services --</option>
+                <option value="Tooth Extraction">Tooth Extraction (Bunot)</option>
+                <option value="Oral Prophylaxis / Cleaning">Oral Prophylaxis / Cleaning (Linis)</option>
+                <option value="Tooth Restoration / Fillings">Tooth Restoration / Fillings (Pasta)</option>
+                <option value="Dentures">Dentures (Pustiso)</option>
+                <option value="Fixed Partial Denture">Fixed Partial Denture (Crowns/Bridges/Veneers)</option>
+                <option value="Odontectomy">Odontectomy (Wisdom Tooth Surgery)</option>
+                <option value="Endodontics">Endodontics (Root Canal Treatment)</option>
+                <option value="Orthodontics">Orthodontics (Dental Braces)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="book-date" required>
+            </div>
+            <div class="form-group">
+              <label>Time Slot</label>
+              <select id="book-time" required>
+                <option value="" disabled selected>-- Select Time Slot --</option>
+                <option value="09:00 AM">09:00 AM</option>
+                <option value="10:30 AM">10:30 AM</option>
+                <option value="01:30 PM">01:30 PM</option>
+                <option value="03:00 PM">03:00 PM</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Confirm Appointment</button>
+          </form>
+        </div>
+
+        <h3 style="font-size: 1.1rem; color: #1a4d2e; font-weight: 700; margin-top: 6px;">Service Details</h3>
+        
+        <div class="service-card">
+          <div class="service-card-title"><i class="fas fa-tooth" style="color:#1abc9c;"></i> Tooth Extraction</div>
+          <div class="service-card-desc">Safe removal of damaged or decayed teeth.</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-card-title"><i class="fas fa-sparkles" style="color:#1abc9c;"></i> Oral Prophylaxis / Cleaning</div>
+          <div class="service-card-desc">Professional teeth cleaning to remove plaque and tartar.</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-card-title"><i class="fas fa-fill-drip" style="color:#1abc9c;"></i> Tooth Restoration / Fillings</div>
+          <div class="service-card-desc">Fillings to repair cavities and restore tooth structure.</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-card-title"><i class="fas fa-smile" style="color:#1abc9c;"></i> Dentures</div>
+          <div class="service-card-desc">Complete and partial denture options, including ordinary, univocal, flexible, metal frame, and uni-flex types.</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-card-title"><i class="fas fa-crown" style="color:#1abc9c;"></i> Fixed Partial Denture</div>
+          <div class="service-card-desc">Jacket crowns, fixed bridges, and veneers.</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-card-title"><i class="fas fa-notes-medical" style="color:#1abc9c;"></i> Odontectomy (Wisdom Tooth)</div>
+          <div class="service-card-desc">Surgical removal of impacted teeth, such as wisdom teeth.</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-card-title"><i class="fas fa-medkit" style="color:#1abc9c;"></i> Endodontics (Root Canal)</div>
+          <div class="service-card-desc">Root canal treatments for infected or deeply decayed teeth.</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-card-title"><i class="fas fa-grimace" style="color:#1abc9c;"></i> Orthodontics (Dental Braces)</div>
+          <div class="service-card-desc">Dental braces to straighten teeth and correct bite alignment.</div>
+        </div>
+
+      </div>
+
+      <!-- 3. ACCOUNT TAB -->
+      <div id="tab-account" class="tab-content">
+        <div class="app-header">
+          <h2 class="brand-title">My Account</h2>
+        </div>
+        <div class="card">
+          <p><strong>Name:</strong> <span id="acc-fullname">-</span></p>
+          <p><strong>Contact:</strong> <span id="acc-phone">-</span></p>
+          <p><strong>Username:</strong> <span id="acc-username">-</span></p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Appointments History</h3>
+          <div id="appointments-list-container">
+            <p style="font-size: 0.88rem; color: #666;">No recent appointments found.</p>
+          </div>
+        </div>
+
+        <button class="btn btn-danger" type="button" onclick="handleLogout()">Log Out</button>
+      </div>
+
+      <!-- Navigation Bar -->
+      <div class="nav-bar">
+        <button class="nav-item active" id="btn-nav-home" onclick="switchTab('tab-home', 'btn-nav-home')">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </button>
+        <button class="nav-item" id="btn-nav-services" onclick="switchTab('tab-services', 'btn-nav-services')">
+          <i class="fas fa-tooth"></i>
+          <span>Services</span>
+        </button>
+        <button class="nav-item" id="btn-nav-account" onclick="switchTab('tab-account', 'btn-nav-account')">
+          <i class="fas fa-user"></i>
+          <span>Account</span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Edit/Reschedule Modal -->
+  <div id="edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; border-radius:15px; width:90%; max-width:400px; display:flex; flex-direction:column; gap:12px;">
+      <h3 style="color:#1a4d2e; text-align:center;">Update Appointment</h3>
+      <input type="hidden" id="edit-app-id">
+      <div class="form-group">
+        <label>Service</label>
+        <select id="edit-service">
+          <option value="Tooth Extraction">Tooth Extraction</option>
+          <option value="Oral Prophylaxis / Cleaning">Oral Prophylaxis / Cleaning</option>
+          <option value="Tooth Restoration / Fillings">Tooth Restoration / Fillings</option>
+          <option value="Dentures">Dentures</option>
+          <option value="Fixed Partial Denture">Fixed Partial Denture</option>
+          <option value="Odontectomy">Odontectomy (Wisdom Tooth Surgery)</option>
+          <option value="Endodontics">Endodontics (Root Canal Treatment)</option>
+          <option value="Orthodontics">Orthodontics (Dental Braces)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="edit-date">
+      </div>
+      <div class="form-group">
+        <label>Time Slot</label>
+        <select id="edit-time">
+          <option value="09:00 AM">09:00 AM</option>
+          <option value="10:30 AM">10:30 AM</option>
+          <option value="01:30 PM">01:30 PM</option>
+          <option value="03:00 PM">03:00 PM</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="submitUpdateAppointment()">Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:5000';
+    let activeUser = null;
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('main-app').classList.remove('active');
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+    }
+
+    function switchTab(tabId, navBtnId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.getElementById(navBtnId).classList.add('active');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => { showScreen('screen-login'); }, 2500);
+    });
+
+    async function handleSignUp(event) {
+      event.preventDefault();
+      const full_name = document.getElementById('signup-fullname').value;
+      const phone = document.getElementById('signup-phone').value;
+      const username = document.getElementById('signup-username').value;
+      const password = document.getElementById('signup-password').value;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ full_name, phone, username, password })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          alert(data.message || 'Account created successfully!');
+          document.getElementById('signup-fullname').value = '';
+          document.getElementById('signup-phone').value = '';
+          document.getElementById('signup-username').value = '';
+          document.getElementById('signup-password').value = '';
+          showScreen('screen-login');
+        } else {
+          alert(data.message || 'Failed to create account.');
+        }
+      } catch (err) {
+        alert('Server connection error. Please ensure python app.py is running in the Terminal!');
+      }
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const usernameInput = document.getElementById('login-username').value;
+      const passwordInput = document.getElementById('login-password').value;
+      const errorMsg = document.getElementById('login-error');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: usernameInput, password: passwordInput })
+        });
+        const data = await response.json();
+        if (response.ok && data.status === 'success') {
+          activeUser = data.user;
+          errorMsg.style.display = 'none';
+          
+          // Ensure it handles any field name returned by the backend safely
+          const userPhone = activeUser.phone || activeUser.contact || activeUser.contact_number || activeUser.phone_number || '-';
+          const userFullName = activeUser.full_name || activeUser.name || '-';
+          const userUsername = activeUser.username || '-';
+
+          document.getElementById('user-display-name').innerText = userFullName !== '-' ? userFullName : userUsername;
+          document.getElementById('acc-fullname').innerText = userFullName;
+          document.getElementById('acc-phone').innerText = userPhone;
+          document.getElementById('acc-username').innerText = userUsername;
+
+          document.getElementById('login-username').value = '';
+          document.getElementById('login-password').value = '';
+          fetchUserAppointments(activeUser.id);
+          document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+          document.getElementById('main-app').classList.add('active');
+          switchTab('tab-home', 'btn-nav-home');
+        } else {
+          errorMsg.style.display = 'block';
+        }
+      } catch (err) {
+        alert('Server connection error. Please ensure python app.py is running in the Terminal!');
+      }
+    }
+
+    async function handleBookAppointment(event) {
+      event.preventDefault();
+      if (!activeUser) return alert('Please log in first!');
+      const service = document.getElementById('book-service').value;
+      const date = document.getElementById('book-date').value;
+      const time_slot = document.getElementById('book-time').value;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/appointments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: activeUser.id, service, date, time_slot })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          alert('Appointment booked successfully!');
+          fetchUserAppointments(activeUser.id);
+          switchTab('tab-account', 'btn-nav-account');
+        } else {
+          alert(data.message || 'Booking failed.');
+        }
+      } catch (err) {
+        alert('Server error during booking.');
+      }
+    }
+
+    async function fetchUserAppointments(userId) {
+      try {
+        const response = await fetch(`${API_BASE}/api/my-appointments/${userId}`);
+        const data = await response.json();
+        const container = document.getElementById('appointments-list-container');
+        if (data.status === 'success' && data.appointments.length > 0) {
+          container.innerHTML = data.appointments.map(app => `
+            <div style="border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; flex-direction: column; gap: 6px;">
+              <p><strong>Service:</strong> ${app.service_name}</p>
+              <p><strong>Date & Time:</strong> ${app.appointment_date} @ ${app.time_slot}</p>
+              <p><strong>Status:</strong> <span style="color: green; font-weight:600;">${app.status}</span></p>
+              <div style="display: flex; gap: 8px; margin-top: 5px;">
+                <button class="btn btn-primary" style="padding: 6px; font-size: 0.8rem;" onclick="openEditModal(${app.id}, '${app.service_name}', '${app.appointment_date}', '${app.time_slot}')">Update</button>
+                <button class="btn btn-danger" style="padding: 6px; font-size: 0.8rem; margin-top:0;" onclick="cancelAppointment(${app.id})">Cancel</button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<p style="font-size: 0.88rem; color: #666;">No recent appointments found.</p>';
+        }
+      } catch (err) {
+        console.error('Error fetching appointments:', err);
+      }
+    }
+
+    function openEditModal(id, service, date, time) {
+      document.getElementById('edit-app-id').value = id;
+      document.getElementById('edit-service').value = service;
+      document.getElementById('edit-date').value = date;
+      document.getElementById('edit-time').value = time;
+      document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    async function submitUpdateAppointment() {
+      const id = document.getElementById('edit-app-id').value;
+      const service = document.getElementById('edit-service').value;
+      const date = document.getElementById('edit-date').value;
+      const time_slot = document.getElementById('edit-time').value;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/appointments/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ service, date, time_slot })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          alert(data.message || 'Appointment updated successfully!');
+          closeEditModal();
+          fetchUserAppointments(activeUser.id);
+        } else {
+          alert(data.message || 'Failed to update appointment.');
+        }
+      } catch (err) {
+        alert('Server connection error during update.');
+      }
+    }
+
+    async function cancelAppointment(id) {
+      if (!confirm('Are you sure you want to cancel this appointment?')) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/appointments/${id}`, {
+          method: 'DELETE'
+        });
+        const data = await response.json();
+        if (response.ok) {
+          alert(data.message || 'Appointment cancelled successfully!');
+          fetchUserAppointments(activeUser.id);
+        } else {
+          alert(data.message || 'Failed to cancel appointment.');
+        }
+      } catch (err) {
+        alert('Server connection error during cancellation.');
+      }
+    }
+
+    function handleLogout() {
+      activeUser = null;
+      showScreen('screen-login');
+    }
+  </script>
+</body>
+</html>
