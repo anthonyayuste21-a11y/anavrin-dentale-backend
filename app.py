@@ -397,7 +397,7 @@ def send_sms_notification():
     cursor = conn.cursor()
     timestamp = datetime.now().strftime('%Y-%m-%d %I:%M %p')
 
-    # Pinagandang email fallback lookup para sigurado ang Resend delivery
+    # Enhanced email fallback lookup for reliable Resend delivery
     if not email:
         if message_id:
             msg_user_row = conn.execute('''
